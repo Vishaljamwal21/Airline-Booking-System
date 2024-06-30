@@ -1,0 +1,101 @@
+﻿@model IEnumerable<AirlineBookingSystem.Models.Flight>
+
+<style>
+
+    .custom-card {
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-card-header {
+        background-color: #343a40;
+        color: #ffffff;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        padding: 10px;
+    }
+
+    .custom-card-body {
+        padding: 20px;
+    }
+
+    .custom-card-footer {
+        padding: 15px;
+    }
+
+    .custom-btn {
+        background-color: #ffc107;
+        color: #212529;
+        border: 1px solid #000000;
+    }
+
+</style>
+<div class="container">
+    <div class="row">
+        @foreach (var flight in Model)
+        {
+            // Check if the departure time is in the past
+            bool isDepartureTimePast = flight.DepartureTime < DateTime.Now;
+            var totalBookedSeats = flight.Bookings.Sum(b => b.NumberOfSeats);
+            // Calculate the available seats by subtracting the total booked seats from the available seats
+            var availableSeats = flight.AvailableSeats - totalBookedSeats;
+            
+            if (availableSeats > 0)
+            {
+                <div class="col-lg-6 mb-4">
+                    <div class="custom-card">
+                        <div class="custom-card-header">
+                            <h5 class="text-warning">@flight.Airline.Name - @flight.FlightNumber</h5>
+                        </div>
+                        <div class="custom-card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Departure Airport:</strong> @flight.DepartureAirport</p>
+                                    <p><strong>Destination Airport:</strong> @flight.DestinationAirport</p>
+                                    <p><strong>Departure Time:</strong> @flight.DepartureTime.ToString("MM/dd/yyyy-HH:mm")</p>
+                                    <p><strong>Arrival Time:</strong> @flight.ArrivalTime.ToString("MM/dd/yyyy-HH:mm")</p>
+                                    <p><strong>Available Seats:</strong> @availableSeats</p>
+
+                                </div>
+                                <div class="col-6 text-center">
+                                    <img src="@flight.ImageUrl" class="card-img-top" alt="Flight Image">
+                                </div>
+                            </div>
+                            <!-- Offer details -->
+                            @if (flight.Offers.Any())
+                            {
+                                <h6>Offers:</h6>
+                                <ul>
+                                    @foreach (var offer in flight.Offers)
+                                    {
+                                        <li>@offer.Name - Discount: @offer.DiscountPercentage%</li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                        <div class="custom-card-footer">
+                            @if (!isDepartureTimePast)
+                            {
+                                <a class="btn btn-warning btn-block custom-btn"
+                                   asp-controller="Booking" asp-action="Index"
+                                asp-route-flightId="@flight.FlightId">Book Tickets</a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-warning btn-block custom-btn" disabled>Booking Closed</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+
+
+
+

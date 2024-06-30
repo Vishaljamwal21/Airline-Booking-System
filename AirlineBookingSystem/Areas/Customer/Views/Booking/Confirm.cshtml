@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Confirm";
+}
+
+
+<div class="container row">
+    <div class="col-12 text-center">
+        <h1 class="text-success text-center">
+           Ticket Booking Confirmation
+        </h1><br />
+        <img src="https://cdn.pixabay.com/photo/2024/02/21/08/44/woman-8587090_1280.png" width="30%" />
+    </div>
+    <div class="col-12 text-center" style="color:green">
+        <br />
+        Thankyou For Ticket Booking! <br />
+        We have received your Ticket Booking
+        <br />
+        Your booking Number is: @ViewBag.BookingId
+        <p class="card-text">@ViewBag.Message</p>
+    </div>
+   
+</div>
+<br />
+<br />
+<div class="col-7 text-right">
+    <a asp-action="Index" asp-controller="BookingDetail" class="btn btn-success btn-sm ">Go to Booking Details</a>
+</div>

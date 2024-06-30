@@ -1,0 +1,52 @@
+﻿@model AirlineBookingSystem.Models.Airline
+@{
+    ViewData["Title"] = "SaveOrEdit";
+    var title = Model.AirlineId != 0 ? "Edit Airline" : "New Airline";
+    var saveUpdate = Model.AirlineId != 0 ? "Update" : "save";
+}
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="@Model.AirlineId" />
+    <div class="row">
+        <div class="col-10 border-bottom">
+            <h2 class="text-primary">@title</h2>
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="col-8">
+            <div class="form-group row p-2 m-2">
+                <div class="col-4">
+                    <label asp-for="@Model.Name"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="@Model.Name" class="form-control">
+                    <span asp-validation-for="@Model.Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group row p-2 m-2">
+                <div class="col-4">
+                    <label asp-for="@Model.Code"></label>
+                </div>
+                <div class="col-8">
+                    <input asp-for="@Model.Code" class="form-control">
+                    <span asp-validation-for="@Model.Code" class="text-danger"></span>
+                </div>
+            </div>        
+            <div class="form-group row p-2 m-2">
+                <div class="col-8 offset-4">
+                    @if (Model.AirlineId != 0)
+                    {
+                        <partial name="_editandbacktolistbutton" />
+                    }
+                    else
+                    {
+                        <partial name="_createandbacktolistbutton" />
+                    }
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</form>
+
+

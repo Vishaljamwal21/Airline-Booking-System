@@ -1,0 +1,109 @@
+﻿@model AirlineBookingSystem.Models.ViewModels.FlightVM
+@{
+    ViewData["Title"] = "SaveorEdit";
+    var title = Model.Flight.FlightId != 0 ? "Edit Flight" : "New Flight";
+}
+
+<div>
+    <h2 class="text-primary border-bottom">@title</h2>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @if (Model.Flight.FlightId != 0)
+            {
+                <input type="hidden" asp-for="@Model.Flight.FlightId" />
+            }
+            <div class="form-group">
+                <label asp-for="Flight.FlightNumber"></label>
+                <input asp-for="Flight.FlightNumber" class="form-control" />
+                <span asp-validation-for="Flight.FlightNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Flight.ImageUrl"></label>
+                <input type="file" name="files" id="uploadBox" accept="image/*" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Flight.DepartureAirport"></label>
+                <input asp-for="Flight.DepartureAirport" class="form-control" />
+                <span asp-validation-for="Flight.DepartureAirport" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Flight.DestinationAirport"></label>
+                <input asp-for="Flight.DestinationAirport" class="form-control"/>
+                <span asp-validation-for="Flight.DestinationAirport" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Flight.DepartureTime"></label>
+                <input asp-for="Flight.DepartureTime" class="form-control" type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" id="departureTime" />
+                <span asp-validation-for="Flight.DepartureTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Flight.ArrivalTime"></label>
+                <input asp-for="Flight.ArrivalTime" class="form-control" type="datetime-local" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" id="arrivalTime" />
+                <span asp-validation-for="Flight.ArrivalTime" class="text-danger"></span>
+                <span id="arrivalTimeError" class="text-danger" style="display:none;">Arrival time must be later than departure time and the time gap should be at least 4 hours.</span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="Flight.AvailableSeats"></label>
+                <input asp-for="Flight.AvailableSeats" class="form-control" data-val="true" data-val-required="Available Seats is required" />
+                <span asp-validation-for="Flight.AvailableSeats" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Flight.AirlineId"></label>
+                @Html.DropDownListFor(m => Model.Flight.AirlineId, Model.AirlineList, "select Category", new { @class = "form-control" })
+                <span asp-validation-for="Flight.AirlineId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                @if (Model.Flight.FlightId != 0)
+                {
+                    <partial name="_EditAndBackToListButton" />
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col">
+                            <button type="submit"class="btn btn-info form-control">Save</button>
+                        </div>
+                        <div class="col">
+                            <a asp-action="Index" class="btn btn-success form-control">Back To List</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+    <div class="col-sm-6">
+        @if (Model.Flight.ImageUrl != null)
+        {
+            <img src="@Model.Flight.ImageUrl" height="400" width="600" />
+        }
+    </div>
+</div>
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById("arrivalTime").addEventListener("change", function () {
+            var departureTime = new Date(document.getElementById("departureTime").value);
+            var arrivalTime = new Date(this.value);
+            var timeDiff = arrivalTime - departureTime;
+            var hoursDiff = Math.abs(timeDiff / 36e5); // Convert milliseconds to hours
+
+            if (timeDiff <= 0 || hoursDiff < 4) {
+                document.getElementById("arrivalTimeError").style.display = "block";
+            } else {
+                document.getElementById("arrivalTimeError").style.display = "none";
+            }
+        });
+    </script>
+    
+
+}
+
+
+

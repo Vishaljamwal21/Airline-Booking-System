@@ -1,0 +1,174 @@
+﻿@model AirlineBookingSystem.Models.ViewModels.BookingVM
+@using AirlineBookingSystem.Models
+@using Microsoft.Extensions.Options
+@inject IOptions<AirlineBookingSystem.StripeSettings> Stripe;
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Book Ticket</h1>
+
+
+<form method="post" asp-action="Index">
+    <div class="col-sm-6">
+      
+        <div class="form-group">
+            <label asp-for="Booking.FlightId" hidden>Flight Id</label>
+            <input asp-for="Booking.FlightId" class="form-control" hidden />
+            <span asp-validation-for="Booking.FlightId" class="text-danger"></span>
+        </div>
+        <input type="hidden" asp-for="Booking.FlightCategoryId"/>
+        <div class="form-group">
+            <label asp-for="Booking.FlightCategoryId">Select Flight Category</label>
+            <select asp-for="Booking.FlightCategoryId" class="form-control" asp-items="@ViewBag.FlightCategoryList">
+                <option value="">-- Select Flight Category --</option>
+            </select>
+            <span asp-validation-for="Booking.FlightCategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Booking.PassengerName">Passenger Name</label>
+            <input asp-for="Booking.PassengerName" class="form-control" />
+            <span asp-validation-for="Booking.PassengerName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Booking.PassengerEmail">Passenger Email</label>
+            <input asp-for="Booking.PassengerEmail" class="form-control" type="email" />
+            <span asp-validation-for="Booking.PassengerEmail" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Booking.AdultCount">Number of Adults</label>
+            <input asp-for="Booking.AdultCount" class="form-control" id="numberOfAdultSeats" />
+            <span asp-validation-for="Booking.AdultCount" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Booking.ChildCount">Number of Children</label>
+            <input asp-for="Booking.ChildCount" class="form-control" id="numberOfChildSeats" />
+            <span asp-validation-for="Booking.ChildCount" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Booking.InfantsCount">Number of Infants</label>
+            <input asp-for="Booking.InfantsCount" class="form-control" id="numberOfInfantSeats" />
+            <span asp-validation-for="Booking.InfantsCount" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Booking.NumberOfSeats">Number of Seats</label>
+            <input asp-for="Booking.NumberOfSeats" class="form-control" id="numberOfSeats" readonly />
+            <span asp-validation-for="Booking.NumberOfSeats" class="text-danger"></span>
+        </div>
+
+
+        <div class="form-group">
+            <label asp-for="Booking.TotalPrice">Total Price</label>
+            <input asp-for="Booking.TotalPrice" class="form-control" id="totalPrice" readonly />
+            <span asp-validation-for="Booking.TotalPrice" class="text-danger"></span>
+        </div>
+
+    </div>
+    <br />
+    <div>
+        @{
+            var TotalAmount = Model.Booking.TotalPrice * 100;
+        }
+        <script src="https://checkout.stripe.com/checkout.js"
+                class="stripe-button"
+                data-key="@Stripe.Value.Publishablekey"
+                data-amount="@TotalAmount"
+                data-name="Book Shopping Project"
+                data-description="Get book"
+                data-local="auto"
+                data-label="Place-Order"
+                dat-allow-render-me="false"
+                data-image=" https://stripe.com/img/documention/checkout/marketplace.png">
+        </script>
+
+        <script>
+            var el = document.getElementsByClassName('stripe-button-el');
+            el[0].style.display = "none";
+        </script>
+        <button type="submit" value="Place Order" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get references to input elements
+            var numberOfAdultSeatsInput = document.getElementById('numberOfAdultSeats');
+            var numberOfChildSeatsInput = document.getElementById('numberOfChildSeats');
+            var numberOfInfantSeatsInput = document.getElementById('numberOfInfantSeats');
+            var totalSeatsInput = document.getElementById('numberOfSeats');
+            var flightCategoryRadios = document.querySelectorAll('input[name="Booking.FlightCategoryId"]');
+            var totalPriceInput = document.getElementById('totalPrice');
+
+            // Add event listeners to all input elements to calculate total seats and total price
+            [numberOfAdultSeatsInput, numberOfChildSeatsInput, numberOfInfantSeatsInput].forEach(function (input) {
+                input.addEventListener('input', updateTotal);
+            });
+
+            flightCategoryRadios.forEach(function (radio) {
+                radio.addEventListener('change', updateTotal);
+            });
+            function updateTotal() {
+                // Get the values from all input elements
+                var numberOfAdultSeats = parseInt(numberOfAdultSeatsInput.value) || 0;
+                var numberOfChildSeats = parseInt(numberOfChildSeatsInput.value) || 0;
+                var numberOfInfantSeats = parseInt(numberOfInfantSeatsInput.value) || 0;
+                var flightCategoryPrice = getFlightCategoryPrice();                
+                var totalSeats = numberOfAdultSeats + numberOfChildSeats + numberOfInfantSeats;              
+                totalSeatsInput.value = totalSeats;
+                var totalPrice = totalSeats * flightCategoryPrice;                
+                totalPriceInput.value = totalPrice.toFixed(2);
+            }
+            function getFlightCategoryPrice() {
+                // Find the selected flight category option
+                var selectedOption = document.querySelector('select[name="Booking.FlightCategoryId"] option:checked');
+                if (selectedOption) {
+                    // Retrieve the price from the value attribute of the selected option
+                    var price = selectedOption.value.split('|')[1];
+                    return parseFloat(price);
+                }
+                return 0;
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the available seats from the flight details
+            var availableSeats = @Model.AvailableSeats;
+            // Get references to input elements
+            var numberOfAdultSeatsInput = document.getElementById('numberOfAdultSeats');
+            var numberOfChildSeatsInput = document.getElementById('numberOfChildSeats');
+            var numberOfInfantSeatsInput = document.getElementById('numberOfInfantSeats');
+            var totalSeatsInput = document.getElementById('numberOfSeats');
+            var totalPriceInput = document.getElementById('totalPrice');
+            // Add event listeners to input elements
+            [numberOfAdultSeatsInput, numberOfChildSeatsInput, numberOfInfantSeatsInput].forEach(function (input) {
+                input.addEventListener('input', validateSeats);
+            });
+
+            // Function to validate the total number of seats
+            function validateSeats() {
+                var numberOfAdultSeats = parseInt(numberOfAdultSeatsInput.value) || 0;
+                var numberOfChildSeats = parseInt(numberOfChildSeatsInput.value) || 0;
+                var numberOfInfantSeats = parseInt(numberOfInfantSeatsInput.value) || 0;
+                var totalSeats = numberOfAdultSeats + numberOfChildSeats + numberOfInfantSeats;
+                if (totalSeats > availableSeats) {
+                    alert('Too many seats selected. Please select fewer seats. Available seats: ' + availableSeats);
+                    // Clear the input fields
+                    numberOfAdultSeatsInput.value = '';
+                    numberOfChildSeatsInput.value = '';
+                    numberOfInfantSeatsInput.value = '';
+                    totalSeatsInput.value = '';
+                    totalPriceInput.value = ''; 
+                }
+            }
+        });    
+    </script>
+}

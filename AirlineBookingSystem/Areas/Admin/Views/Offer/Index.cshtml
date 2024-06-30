@@ -1,0 +1,48 @@
+﻿@model IEnumerable<AirlineBookingSystem.Models.Offer>
+
+<div class="row">
+    <div class="col-9">
+        <h2 class="text-primary">Offers List</h2>
+    </div>
+    <div class="col-3">
+        <a asp-action="SaveOrEdit" class="btn btn-info form-control">
+            <i class="fas fa-plus">&nbsp;Add Offers</i>
+        </a>
+    </div>
+</div>
+<div class="container rounded border p-2 m-2">
+    <table class="table table-bordered table-striped table-active">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Discount Percentage</th>
+                <th>Validity Period</th>
+                <th>Flight ID</th>
+                <th>Airline ID</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var offer in Model)
+            {
+                <tr>
+                    <td>@offer.Name</td>
+                    <td>@offer.DiscountPercentage</td>
+                    <td>@offer.ValidityPeriod.ToShortDateString()</td>
+                    <td>@offer.FlightId</td>
+                    <td>@offer.AirlineId</td>
+                    <td>
+                        <a href="/Admin/Offer/SaveOrEdit/@offer.OfferId" class="btn btn-info">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@offer.OfferId" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,86 @@
+﻿@model AirlineBookingSystem.Models.ViewModels.OfferViewModel
+@{
+    ViewData["Title"] = "SaveorEdit";
+    var title = Model.Offer.OfferId != 0 ? "Edit Offer" : "New Offer";
+}
+
+<div>
+    <h2 class="text-primary border-bottom">@title</h2>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @if (Model.Offer.OfferId != 0)
+            {
+                <input type="hidden" asp-for="@Model.Offer.OfferId" />
+            }
+            <div class="form-group">
+                <label asp-for="Offer.Name"></label>
+                <input asp-for="Offer.Name" class="form-control" />
+                <span asp-validation-for="Offer.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Offer.DiscountPercentage"></label>
+                <input asp-for="Offer.DiscountPercentage" class="form-control" />
+                <span asp-validation-for="Offer.DiscountPercentage" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Offer.ValidityPeriod"></label>
+                <input asp-for="Offer.ValidityPeriod" class="form-control" />
+                <span asp-validation-for="Offer.ValidityPeriod" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Offer.AirlineId">Airline:</label>
+                @Html.DropDownListFor(m => m.Offer.AirlineId, Model.Airlines, "Select Airline", new { @class = "form-control", id = "airlineDropdown" })
+                <span asp-validation-for="Offer.AirlineId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedFlightId">Flight:</label>
+                <select id="flightDropdown" asp-for="SelectedFlightId" class="form-control">
+                    <option value="">Select Flight</option>
+                </select>
+                <span asp-validation-for="SelectedFlightId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                @if (Model.Offer.OfferId != 0)
+                {
+                    <partial name="_EditAndBackToListButton" />
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col">
+                            <button type="submit" class="btn btn-info form-control">Save</button>
+                        </div>
+                        <div class="col">
+                            <a asp-action="Index" class="btn btn-success form-control">Back To List</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('#airlineDropdown').change(function () {
+                var airlineId = $(this).val();
+                $.ajax({
+                    url: '/Admin/Offer/GetFlightsByAirlineId?airlineId=' + airlineId,
+                    type: 'GET',
+                    success: function (data) {
+                        $('#flightDropdown').empty();
+                        $.each(data, function (index, flight) {
+                            $('#flightDropdown').append($('<option>', {
+                                value: flight.value,
+                                text: flight.text
+                            }));
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
